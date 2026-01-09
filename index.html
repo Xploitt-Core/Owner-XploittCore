@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Red Hacker Scroll</title>
+
+<style>
+html{
+    scroll-behavior:smooth; /* SMOOTH SCROLL */
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:black;
+    font-family:monospace;
+    color:red;
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+/* SCROLL INDICATOR */
+#scrollBar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:4px;
+    width:0%;
+    background:red;
+    box-shadow:0 0 10px red;
+    z-index:9998;
+}
+
+/* MATRIX */
+canvas{
+    position:fixed;
+    inset:0;
+    z-index:1;
+}
+
+/* LOGIN OVERLAY */
+.login-overlay{
+    position:fixed;
+    inset:0;
+    background:black;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.login-box{
+    width:320px;
+    padding:30px;
+    border:2px solid red;
+    background:black;
+    box-shadow:0 0 30px red;
+    text-align:center;
+}
+
+.login-box h2{
+    margin-bottom:20px;
+    text-shadow:0 0 10px red;
+}
+
+.login-box input{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+    background:black;
+    border:1px solid red;
+    color:red;
+}
+
+.login-box button{
+    width:100%;
+    padding:10px;
+    background:red;
+    color:black;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+    box-shadow:0 0 15px red;
+}
+
+.login-box button:hover{
+    background:black;
+    color:red;
+}
+
+#error{
+    display:none;
+    color:#ff4444;
+}
+
+/* CONTAINER */
+.container{
+    position:relative;
+    z-index:2;
+    max-width:800px;
+    margin:0 auto;
+    padding:120px 20px;
+    display:none;
+}
+
+/* GLITCH ON SCROLL */
+.glitch-scroll{
+    animation:glitchScroll .2s linear;
+}
+
+@keyframes glitchScroll{
+    0%{transform:translate(0);}
+    25%{transform:translate(-2px,2px);}
+    50%{transform:translate(2px,-2px);}
+    75%{transform:translate(-2px,-2px);}
+    100%{transform:translate(0);}
+}
+
+/* CENTER CIRCLE */
+.center-circle{
+    width:260px;
+    height:260px;
+    margin:0 auto 200px auto;
+    position:relative;
+}
+
+.circle-text{
+    position:absolute;
+    inset:0;
+    animation:rotateText 12s linear infinite;
+}
+
+.circle-text text{
+    fill:red;
+    font-size:16px;
+    letter-spacing:3px;
+    text-shadow:0 0 10px red;
+}
+
+.inner-circle{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    border:3px solid red;
+    box-shadow:0 0 20px red;
+    background:black;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    animation:pulse 2s infinite;
+}
+
+/* GLITCH IMAGE */
+.glitch-effect{
+    position:relative;
+    width:140px;
+    height:140px;
+}
+
+.glitch-effect img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    animation:glitchAnim 2s infinite;
+}
+
+.glitch-effect img:nth-child(2){
+    animation-delay:.2s;
+    mix-blend-mode:screen;
+}
+
+.glitch-effect img:nth-child(3){
+    animation-delay:.4s;
+    mix-blend-mode:multiply;
+}
+
+/* HACKER BOX */
+.hacker-box{
+    width:320px;
+    margin:0 auto 250px auto;
+    background:black;
+    border:2px solid red;
+    border-radius:15px;
+    box-shadow:0 0 20px red;
+    padding:20px;
+    text-align:center;
+}
+
+.hacker-box .title{
+    font-size:20px;
+    margin-bottom:10px;
+    text-shadow:0 0 10px red;
+}
+
+/* SOUND BUTTON */
+#playSoundBtn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    padding:10px 15px;
+    background:red;
+    border:none;
+    cursor:pointer;
+    z-index:1000;
+}
+
+/* ANIM */
+@keyframes rotateText{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+@keyframes pulse{
+    0%{box-shadow:0 0 15px red;}
+    50%{box-shadow:0 0 40px red;}
+    100%{box-shadow:0 0 15px red;}
+}
+@keyframes glitchAnim{
+    0%{transform:translate(0);}
+    25%{transform:translate(-3px,3px);}
+    50%{transform:translate(3px,-3px);}
+    75%{transform:translate(-3px,-3px);}
+    100%{transform:translate(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div id="scrollBar"></div>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <h2>SYSTEM LOGIN</h2>
+        <input id="user" placeholder="USERNAME">
+        <input id="pass" type="password" placeholder="PASSWORD">
+        <button onclick="doLogin()">ENTER</button>
+        <div id="error">ACCESS DENIED</div>
+    </div>
+</div>
+
+<canvas id="matrix"></canvas>
+
+<div class="container" id="main">
+
+    <div class="center-circle glitchTarget">
+        <svg class="circle-text" viewBox="0 0 300 300">
+            <defs>
+                <path id="circlePath"
+                d="M150,150 m-120,0 a120,120 0 1,1 240,0 a120,120 0 1,1 -240,0"/>
+            </defs>
+            <text>
+                <textPath href="#circlePath">
+                    AZKA X PLOITT • RED HACKER • SYSTEM ACCESS •
+                </textPath>
+            </text>
+        </svg>
+
+        <div class="inner-circle">
+            <div class="glitch-effect glitchTarget">
+                <img src="https://files.catbox.moe/eh2s1o.jpg">
+                <img src="https://files.catbox.moe/eh2s1o.jpg">
+                <img src="https://files.catbox.moe/eh2s1o.jpg">
+            </div>
+        </div>
+    </div>
+
+    <div class="hacker-box glitchTarget">
+        <div class="title">SYSTEM AZKA X PLOITT</div>
+        ACCESS GRANTED<br>
+        WELCOME USER<br>
+        SKILLS<br>
+        1. MEMBUAT HTML<br>
+        2. MEMBUAT APK BUG
+    </div>
+
+</div>
+
+<audio id="bgSound" loop>
+  <source src="suaramusik.mp3">
+</audio>
+
+<button id="playSoundBtn">Play Sound</button>
+
+<script>
+/* LOGIN */
+function doLogin(){
+    if(user.value==="admin" && pass.value==="root"){
+        loginOverlay.style.display="none";
+        main.style.display="block";
+    }else{
+        error.style.display="block";
+    }
+}
+
+/* SOUND */
+playSoundBtn.onclick=()=>{
+    bgSound.play();
+    playSoundBtn.style.display="none";
+};
+
+/* SCROLL INDICATOR + GLITCH */
+window.addEventListener("scroll",()=>{
+    const h=document.documentElement;
+    const sc=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100;
+    scrollBar.style.width=sc+"%";
+
+    document.querySelectorAll(".glitchTarget").forEach(el=>{
+        el.classList.add("glitch-scroll");
+        setTimeout(()=>el.classList.remove("glitch-scroll"),150);
+    });
+});
+
+/* MATRIX */
+const c=matrix,ctx=c.getContext("2d");
+function resize(){c.width=innerWidth;c.height=innerHeight;}
+resize();
+const chars="0123456789",font=16;
+let drops=Array(Math.floor(c.width/font)).fill(1);
+
+setInterval(()=>{
+    ctx.fillStyle="rgba(0,0,0,.1)";
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle="red";
+    ctx.font=font+"px monospace";
+    drops.forEach((y,i)=>{
+        ctx.fillText(chars[Math.random()*chars.length|0],i*font,y*font);
+        drops[i]=y*font>c.height&&Math.random()>.95?0:y+1;
+    });
+},30);
+</script>
+
+</body>
+</html>
